@@ -5,22 +5,22 @@ struct stats {
     size_t comparison_count = 0;
     size_t copy_count = 0;
 };
-stats bubble_sort(vector<int>& data) {
-    stats result;
-    for (size_t i = 0; i < data.size()-1; ++i) {
-        for (size_t j = 0; j < data.size() - i - 1; ++j) {
-            result.comparison_count++;
-            if (data[j] > data[j + 1]) {
-                int value = data[j + 1];
-                data[j+1] = data[j];
-                data[j] = value;
-                result.copy_count++;
+stats bubble_sort(std::vector<int>& data)
+{
+    stats stat;
+    for (size_t i = 0; i < data.size() - 1; i++){
+        for (size_t j = 0; j < data.size() - i - 1; j++){
+            stat.comparison_count++;
+            if (data[j + 1] < data[j]){
+                int temp = data[j + 1];
+                data[j + 1] = data[j];
+                data[j] = temp;
+                stat.copy_count++;
             }
         }
-        result.copy_count++;
     }
-    return result;
-};
+    return stat;
+}
 stats cocktail_sort(vector<int>& data){
     stats result;
     bool swapped = true;
@@ -62,6 +62,7 @@ stats cocktail_sort(vector<int>& data){
 }
 int main() {
     vector<int> v1(5);
+    stats result;
     for (size_t i = 0; i < v1.size(); ++i) {
         cin >> v1[i];
     }
@@ -69,8 +70,10 @@ int main() {
         cout << "[" << v1[i] << "] ";
     }
     cout << "\n";
-    bubble_sort(v1);
-    cocktail_sort(v1);
+    //result=bubble_sort(v1);
+    //result = cocktail_sort(v1);
+    //cout << "Comparison count: "<<result.comparison_count<<endl;
+    //cout << "Copy count: " << result.copy_count << endl;
     for (size_t i = 0; i < v1.size(); ++i) {
         cout << "[" << v1[i] << "] ";
     }
