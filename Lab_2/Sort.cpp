@@ -60,100 +60,177 @@ stats cocktail_sort(vector<int>& data){
     }
     return result;
 }
-stats Two_Way_Merge_Sort(std::vector<int>& data)
+bool Is_Sorted(vector<int>& data) {
+    int check = 0;
+    for (size_t i = 0; i < data.size()-1; ++i) {
+        if (data[i] <= data[i + 1]) ++check;
+    }
+   return check == (data.size() - 1) ? 1 : 0;
+}
+vector<int> Merge(vector<int>& leftpod, vector<int>& rightpod, stats& stat)
 {
+	vector<int> respod(leftpod.size() + rightpod.size());
+	size_t i = 0;
+	size_t j = 0;
+	size_t k = 0;
+	while (k != leftpod.size() + rightpod.size())
+	{
+		if (i == leftpod.size()){
+			respod[k] = rightpod[j];
+			j++;
+			k++;
+			stat.copy_count++;
+			continue;
+		}
+		if (j == rightpod.size()){
+			respod[k] = leftpod[i];
+			i++;
+			k++;
+			stat.copy_count++;
+			continue;
+		}
+		if (leftpod[i] < rightpod[j]){
+			respod[k] = leftpod[i];
+			i++;
+		}
+		else{
+			respod[k] = rightpod[j];
+			j++;
+
+		}
+		stat.copy_count++;
+		stat.comparison_count++;
+		k++;
+	}
+	return respod;
+}
+
+stats Two_Way_Merge_Sort(vector<int>& data, stats result)
+{
+    if (data.size() == 1) return result;
+    if (Is_Sorted(data) == true) return result;
     stats stat;
-    std::vector<int> res(data.size());
-    int l = 0;
-    int r = data.size() - 1;
-    int count = 0;
-    while (l != r) {
-        ++count;
-        while (l < r && data[l] < data[l + 1]) ++l;
-        vector<int> leftpod(l + 1);
-        while (r > l && data[r] < data[r - 1]) --r;
-        vector<int> rightpod(data.size() - r);
-        for (int i = 0; i <= l; ++i) {
-            leftpod[i] = data[i];
-        }
-        for (int i = 0; i < data.size() - r; ++i) {
-            rightpod[i] = data[data.size() - 1 - i];
-        }
-        vector<int> respod(leftpod.size() + rightpod.size());
-        int j = 0;
-        int k = 0;
-        int c = 0;
-        /*for (int i = 0; i < leftpod.size() + rightpod.size(); i++) {
-            if (k < leftpod.size() && j < rightpod.size()) {
-                if (leftpod[j] > rightpod[k]) {
-                    respod[i]=rightpod[k];
-                    k++;
+    while (Is_Sorted(data) != true) {
+        vector<int> res(data.size());
+        int l = 0;
+        int l_new = 0;
+        int r = data.size() - 1;
+        int r_new = data.size() - 1;
+        bool count = true;
+        while (l_new < r_new) {
+            vector<int> leftpod;
+            vector<int> rightpod;
+            while (l < r && data[l] <= data[l + 1] && (l < data.size())) {
+                leftpod.push_back(data[l]);
+                ++l;
+                stat.comparison_count++;
+            }
+            leftpod.push_back(data[l]);
+            while (r > l && data[r] <= data[r - 1] && (r > 0)) {
+                rightpod.push_back(data[r]);
+                --r;
+                stat.comparison_count++;
+            }
+            rightpod.push_back(data[r]);
+            vector<int> respod = Merge(leftpod, rightpod, stat);
+            if (count) {
+                if (respod.size() < res.size()) {
+                    for (int i = 0; i <= respod.size()-1; i++) {
+                        res[l_new] = respod[i];
+                        l_new++;
+                        stat.copy_count++;
+                    }
                 }
                 else {
-                    respod[i]=leftpod[j];
-                    j++;
+                    for (int i = 0; i <= res.size()-1; i++) {
+                        res[l_new] = respod[i];
+                        l_new++;
+                        stat.copy_count++;
+                    }
                 }
-            }
-        }*/
-        for (int i = 0; i <= respod.size() - 1; i++) {
-            if (j <= leftpod.size() - 1 && leftpod[j] < rightpod[k]) {
-                respod[i] = leftpod[j];
-                ++j;
+                count = false;
             }
             else {
-                respod[i] = rightpod[k];
-                if (k < rightpod.size() - 1) ++k;
-            }
-        }
-
-        /*else {
-            for (int i = j + k; i < leftpod.size(); i++) {
-                if (leftpod[j] <= rightpod[k]) {
-                    res[j + k] = leftpod[j];
-                    ++j;
+                if (respod.size() < res.size()-1) {
+                    for (int i = 0; i < respod.size()-1; ++i) {
+                        res[r_new] = respod[i];
+                        r_new--;
+                        stat.copy_count++;
+                    }
                 }
                 else {
-                    res[j + k] = rightpod[k];
-                    ++k;
+                    for (int i = 0; i < res.size(); ++i) {
+                        res[r_new] = respod[i];
+                        r_new--;
+                        stat.copy_count++;
+                    }
                 }
+                count = true;
             }
-            for (int i = leftpod.size(); i < respod.size(); i++) {
-                respod[respod.size() - i] = rightpod[i];
-            }
+            if(l<data.size()) l++;
+            if(r>0) r--;
         }
-    }*/
-        if (count % 2 != 0) {
-            for (int i = 0; i < respod.size(); ++i) {
-                res[i] = respod[i];
-            }
-        }
-        else {
-            for (int i = res.size() - 1; i >= res.size() - respod.size(); --i) {
-                res[i] = respod[res.size()-i];
-            }
-        }
+        if (((data.size()-1)%2==0) && (r==l)) res[r] = data[data.size()-r];
         data = res;
+        stat.copy_count += res.size();
     }
     return stat;
 }
 int main() {
-    vector<int> v1(5);
+    srand(time(NULL));
     stats result;
-    for (size_t i = 0; i < v1.size(); ++i) {
-        cin >> v1[i];
+    vector <int> v3(10);
+    for (auto i = v3.begin(); i != v3.end(); ++i) {
+        *i = rand() % 10-5;
+    }
+    vector <int> v2(10);
+    vector <int> v1(10);
+    for (auto i = v3.begin(); i != v3.end(); ++i){
+        *i = rand() % 10;
+    }
+    for (auto i = v2.begin(); i != v2.end(); ++i) {
+        *i = rand() % 10;
+    }
+    for (auto i = v1.begin(); i != v1.end(); ++i) {
+        *i = rand() % 10;
     }
     for (size_t i = 0; i < v1.size(); ++i) {
         cout << "[" << v1[i] << "] ";
     }
     cout << "\n";
-    //result=bubble_sort(v1);
-    //result = cocktail_sort(v1);
-    result = Two_Way_Merge_Sort(v1);
-    //cout << "Comparison count: "<<result.comparison_count<<endl;
-    //cout << "Copy count: " << result.copy_count << endl;
+    result = bubble_sort(v1);
     for (size_t i = 0; i < v1.size(); ++i) {
         cout << "[" << v1[i] << "] ";
     }
+    cout << "\n";
+    cout << "Comparison count: " << result.comparison_count << endl;
+    cout << "Copy count: " << result.copy_count << endl;
+    cout << "\n";
+
+    for (size_t i = 0; i < v2.size(); ++i) {
+        cout << "[" << v2[i] << "] ";
+    }
+    result=cocktail_sort(v2);
+    cout << "\n";
+    for (size_t i = 0; i < v2.size(); ++i) {
+        cout << "[" << v2[i] << "] ";
+    }
+    cout << "\n";
+    cout << "Comparison count: " << result.comparison_count << endl;
+    cout << "Copy count: " << result.copy_count << endl;
+    cout << "\n";
+
+    for (size_t i = 0; i < v3.size(); ++i) {
+        cout << "[" << v3[i] << "] ";
+    }
+    result = Two_Way_Merge_Sort(v3, result);
+    cout << "\n";
+    for (size_t i = 0; i < v3.size(); ++i) {
+        cout << "[" << v3[i] << "] ";
+    }
+    cout << "\n";
+    cout << "Comparison count: " << result.comparison_count << endl;
+    cout << "Copy count: " << result.copy_count << endl;
     cout << "\n";
     return 0;
 }
